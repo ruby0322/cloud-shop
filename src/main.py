@@ -93,7 +93,7 @@ def main():
         except ValueError as e:
             print("Error - invalid number format")
         except Exception as e:
-            print(f"Error - {str(e)}")
+            sys.stdout.write(e)
 
 if __name__ == "__main__":
     main() 
