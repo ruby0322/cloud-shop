@@ -15,12 +15,12 @@ A command-line marketplace platform that allows users to buy and sell items.
 ```bash
 chmod +x build.sh run.sh
 ```
-1. Build the project:
+3. Build the project:
 
 ```bash
 ./build.sh
 ```
-1. Run the application:
+4. Run the application:
    
 ```bash
 ./run.sh
@@ -41,11 +41,11 @@ The application accepts the following commands:
 
 ```
 .
-├── src/
-│   ├── models/         # Data models
-│   ├── services/       # Business logic
-│   └── main.py         # Entry point
-├── build.sh           # Build script
-├── run.sh            # Run script
-└── README.md         # This file
+|-- src/
+|   |-- models/         # Data models
+|   |-- services/       # Business logic
+|   |-- main.py         # Entry point
+|-- build.sh           # Build script
+|-- run.sh            # Run script
+|-- README.md         # This file
 ``` 
