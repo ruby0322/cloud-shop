@@ -1,3 +1,4 @@
+import csv
 from collections import defaultdict
 from typing import Dict, List, Optional
 
@@ -10,6 +11,43 @@ class MarketplaceService:
         self.users: Dict[str, User] = {}  # username -> User
         self.listings: Dict[int, Listing] = {}  # listing_id -> Listing
         self.category_listings: Dict[str, List[int]] = defaultdict(list)  # category -> [listing_ids]
+        self.load_data()
+
+    def load_data(self):
+        """Load users and listings from CSV files"""
+        try:
+            with open('users.csv', mode='r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    username = row[0]
+                    self.users[username] = User(username)
+        except FileNotFoundError:
+            pass
+
+        try:
+            with open('listings.csv', mode='r') as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    listing_id, title, description, price, category, username = row
+                    listing = Listing(title, description, float(price), category, username)
+                    listing.id = int(listing_id)
+                    self.listings[listing.id] = listing
+                    self.users[username.lower()].listings.append(listing.id)
+                    self.category_listings[category].append(listing.id)
+        except FileNotFoundError:
+            pass
+
+    def save_data(self):
+        """Save users and listings to CSV files"""
+        with open('users.csv', mode='w') as file:
+            writer = csv.writer(file)
+            for username in self.users:
+                writer.writerow([username])
+
+        with open('listings.csv', mode='w') as file:
+            writer = csv.writer(file)
+            for listing in self.listings.values():
+                writer.writerow([listing.id, listing.title, listing.description, listing.price, listing.category, listing.username])
 
     def register_user(self, username: str) -> str:
         """Register a new user"""
@@ -17,6 +55,7 @@ class MarketplaceService:
             return "Error - user already existing"
         
         self.users[username.lower()] = User(username)
+        self.save_data()
         return "Success"
 
     def create_listing(self, username: str, title: str, description: str, price: float, category: str) -> str:
@@ -28,6 +67,7 @@ class MarketplaceService:
         self.listings[listing.id] = listing
         self.users[username.lower()].listings.append(listing.id)
         self.category_listings[category].append(listing.id)
+        self.save_data()
         
         return str(listing.id)
 
@@ -44,6 +84,7 @@ class MarketplaceService:
         self.category_listings[listing.category].remove(listing_id)
         self.users[username.lower()].listings.remove(listing_id)
         del self.listings[listing_id]
+        self.save_data()
         
         return "Success"
 
@@ -82,10 +123,13 @@ class MarketplaceService:
         if not self.category_listings:
             return "Error - no categories found"
             
-        # Find category with most listings
-        top_category = max(
-            self.category_listings.items(),
-            key=lambda x: len(x[1])
-        )[0]
+        # Find the maximum number of listings in any category
+        max_count = max(len(listings) for listings in self.category_listings.values())
         
-        return top_category 
+        # Find all categories with the maximum number of listings
+        top_categories = [category for category, listings in self.category_listings.items() if len(listings) == max_count]
+        
+        # Sort the categories lexicographically
+        top_categories.sort()
+        
+        return ", ".join(top_categories)
